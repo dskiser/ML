@@ -684,7 +684,26 @@ public class Matrix
 		
 		return value;
 	}
-
+	
+	/// Shuffle the rows of a matrix
+	public void shuffle() {
+		Random d = new Random();
+		
+		int length = this.rows();
+		int[] indexes = new int[length];
+		for(int i=0; i<length; i++) {
+			indexes[i] = i;
+		}
+		for(int i=length-1; i>0; i--) {
+			int temp = indexes[i];
+			int swap_index = d.nextInt(length);
+			indexes[i] = indexes[swap_index]; 
+			indexes[swap_index] = temp;
+		}
+		for(int i=0; i<length; i++) {
+			this.swapRows(i, indexes[i]);
+		}
+	}
 
 	/// Copies the specified rectangular portion of that matrix, and puts it in the specified location in this matrix.
 	public void copyBlock(int destRow, int destCol, Matrix that, int rowBegin, int colBegin, int rowCount, int colCount)
