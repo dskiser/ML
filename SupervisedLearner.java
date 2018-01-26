@@ -4,9 +4,18 @@
 // ----------------------------------------------------------------
 
 import java.lang.Math;
+import java.util.ArrayList;
 
 abstract class SupervisedLearner 
 {
+	protected ArrayList<LayerLinear> layerCollection;
+	protected ArrayList<Vec> layerWeights;
+	
+	SupervisedLearner() {
+		layerCollection = new ArrayList<LayerLinear>(5);
+		layerWeights = new ArrayList<Vec>(5);
+	}
+	
 	/// Return the name of this learner
 	abstract String name();
 
@@ -47,11 +56,7 @@ abstract class SupervisedLearner
 			Vec pred = predicted.row(i);
 			for(int j = 0; j < tr.size(); j++)
 			{
-				double test = tr.get(j) - pred.get(j);
 				double errorSquared = Math.pow((tr.get(j) - pred.get(j)), 2);
-				if(errorSquared >= 3000) {
-					System.out.println("Actual: " + tr.get(j) + " Predicted: " + pred.get(j));
-				}
 				sumSquaredError += errorSquared;
 			}
 		}
@@ -110,19 +115,28 @@ abstract class SupervisedLearner
 					double[] yrow = trainY.removeRow(testStartRow);
 					testY.takeRow(yrow);
 				}
-				
+
+					
 				// Train model
 				this.train(trainX, trainY);
+				//System.out.println(this.layerWeights);
 				
 				// Use model to predict Y on test Matrices
 				Matrix Y_hat = new Matrix(0, Y.cols());
 				for(int k=0; k<testY.rows(); k++) {
-					Vec Xrow = X.row(k);
+					Vec Xrow = testX.row(k);
 					Vec Yrow = this.predict(Xrow);
 					Y_hat.takeVec(Yrow);
 				}
+				
+				/* To compare actual response versus predicted response
+				for(int p=0; p<testY.rows(); p++) {
+					System.out.println(testY.get(p,0) + " " + Y_hat.get(p,0));
+				}
+				*/
 				// Compute sumSquareError of each fold
-				totalSSE += computeSumSquaredError(testY, Y_hat);		
+				totalSSE += computeSumSquaredError(testY, Y_hat);
+						
 			}
 		}
 		double avgSSE = totalSSE / reps;
@@ -179,7 +193,7 @@ abstract class SupervisedLearner
 		double[] f = { 4, 4 };
 		Y.takeRow(f);		
 		
-		double RMSE = test.crossValidate(X, Y, 50, 2);
+		double RMSE = test.crossValidate(X, Y, 2, 2);
 		if(RMSE < 5 || RMSE > 30)
 			throw new TestFailedException("testCrossValidate");
 	}
@@ -197,5 +211,24 @@ abstract class SupervisedLearner
 		
 		double SSE = test.computeSumSquaredError(actual, pred);
 		if(SSE != 4.0) throw new TestFailedException("computeSumSquaredError");
+	}
+	
+	static void testCrossValidate2() 
+			throws TestFailedException {
+		Matrix features = new Matrix(3,1);
+		features.fill(0.0);
+		Matrix labels = new Matrix(0, 1);
+		for(int i=2; i<7; i+=2) {
+			double[] value = { (double)i };
+			labels.takeRow(value);
+		}
+				
+		NeuralNet test = new NeuralNet();
+		LayerLinear testlinear = new LayerLinear(1, 1);
+		test.layerCollection.add(testlinear);
+		
+		double RMSE = test.crossValidate(features, labels, 2, 3);
+		if(RMSE != Math.sqrt(6))
+			throw new TestFailedException("testCrossValidate2");
 	}
 }

@@ -105,7 +105,7 @@ class LayerLinear extends Layer {
 		Matrix X = new Matrix(0, inputs);
 		for(int i=0; i<50; i++) {
 			double[] row = new double[inputs];
-			for(int j=0; j<inputs; j++) row[j] = -50 + (100 * d.nextDouble());
+			for(int j=0; j<inputs; j++) row[j] = -25 + (50 * d.nextDouble());
 			X.takeRow(row);
 		}
 		
@@ -130,7 +130,7 @@ class LayerLinear extends Layer {
 			double[] column = Y.m_data.get(i);
 			double[] noisy_column = new double[column.length];
 			for(int j=0; j<column.length; j++) {
-				double randomIncrement = -0.1 + (0.2 * d.nextDouble());
+				double randomIncrement = -25 + (50 * d.nextGaussian());
 				noisy_column[j] = column[j] + randomIncrement;
 			}
 			Y.m_data.set(i, noisy_column);
@@ -149,7 +149,7 @@ class LayerLinear extends Layer {
 		}
 		
 		// Compare new weights with original weights
-		if(weights.squaredDistance(new_weights) > 25)
+		if(weights.squaredDistance(new_weights) > 3000)
 			throw new TestFailedException("testOrdinary_least_squares");
 	}
 }

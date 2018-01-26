@@ -1,12 +1,9 @@
 import java.util.ArrayList;
 
 class NeuralNet extends SupervisedLearner {
-	protected ArrayList<LayerLinear> layerCollection;
-	protected ArrayList<Vec> layerWeights;
-	
+
 	NeuralNet() {
-		layerCollection = new ArrayList<LayerLinear>(5);
-		layerWeights = new ArrayList<Vec>(5);
+		super();
 	}
 	
 	public Vec predict(Vec x) {
@@ -16,7 +13,7 @@ class NeuralNet extends SupervisedLearner {
 	}
 	
 	public void train(Matrix X, Matrix Y) {
-		Vec weights = layerCollection.get(0).ordinary_least_squares(X, Y);	
+		Vec weights = layerCollection.get(0).ordinary_least_squares(X, Y);
 		layerWeights.add(0, weights);
 	}
 	

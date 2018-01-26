@@ -43,7 +43,8 @@ class Main
 		try {
 			LayerLinear.testOrdinary_least_squares(8, 2, false);
 			LayerLinear.testActivate(false);
-			//NeuralNet.testCrossValidate();
+			NeuralNet.testCrossValidate();
+			NeuralNet.testCrossValidate2();
 			NeuralNet.testComputeSumSquaredError();
 		} catch (TestFailedException exc) {
 			System.out.println(exc);
@@ -66,7 +67,7 @@ class Main
 		housingModel.layerCollection.add(ols);
 		
 		
-		// Cross-validate model{
+		// Cross-validate model
 		double RMSE = 
 			housingModel.crossValidate(housingFeatures, housingLabels, 5, 10);
 		System.out.println(RMSE);
