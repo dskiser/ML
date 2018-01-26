@@ -43,14 +43,32 @@ class Main
 		try {
 			LayerLinear.testOrdinary_least_squares(8, 2, false);
 			LayerLinear.testActivate(false);
-			NeuralNet.testCrossValidate();
+			//NeuralNet.testCrossValidate();
+			NeuralNet.testComputeSumSquaredError();
 		} catch (TestFailedException exc) {
 			System.out.println(exc);
 		}
 		//testLearner(new BaselineLearner());
 		//testLearner(new RandomForest(50));
+		//Matrix.testShuffle();
 		
-
+		// Model housing prices in Boston
 		
+		// Load data into Matrices
+		Matrix housingFeatures = new Matrix();
+		Matrix housingLabels = new Matrix();
+		housingFeatures.loadARFF("data/housing_features.arff");
+		housingLabels.loadARFF("data/housing_labels.arff");
+		
+		// Initialize Layer and NeuralNet
+		LayerLinear ols = new LayerLinear(housingFeatures.cols(), housingLabels.cols());
+		NeuralNet housingModel = new NeuralNet();
+		housingModel.layerCollection.add(ols);
+		
+		
+		// Cross-validate model{
+		double RMSE = 
+			housingModel.crossValidate(housingFeatures, housingLabels, 5, 10);
+		System.out.println(RMSE);
 	}
 }

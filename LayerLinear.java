@@ -149,7 +149,7 @@ class LayerLinear extends Layer {
 		}
 		
 		// Compare new weights with original weights
-		if(weights.squaredDistance(new_weights) > 10)
+		if(weights.squaredDistance(new_weights) > 25)
 			throw new TestFailedException("testOrdinary_least_squares");
 	}
 }

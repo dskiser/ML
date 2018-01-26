@@ -509,6 +509,18 @@ public class Matrix
 			throw new IllegalArgumentException("Row size differs from the number of columns in this matrix.");
 		m_data.add(row);
 	}
+	
+	/// Appends the specified Vec to this matrix (as a row).
+	public void takeVec(Vec row)
+	{
+		if(row.size() != cols())
+			throw new IllegalArgumentException("Row size differs from the number of columns in this matrix.");
+		double[] values = new double[row.size()];
+		for(int i=0; i<values.length; i++) {
+			values[i] = row.get(i);
+		}
+		takeRow(values);
+	}
 
 
 	/// Adds 'n' new rows to this matrix
@@ -703,6 +715,17 @@ public class Matrix
 		for(int i=0; i<length; i++) {
 			this.swapRows(i, indexes[i]);
 		}
+	}
+	
+	/// Test shuffle
+	public static void testShuffle() {
+		Random d = new Random();
+		Matrix test = new Matrix(25, 3);
+		test.fill(0.0);
+		double[] values = { 1.0, 1.0, 1.0 };
+		test.takeRow(values);
+		test.shuffle();
+		System.out.println(test);
 	}
 
 	/// Copies the specified rectangular portion of that matrix, and puts it in the specified location in this matrix.
@@ -953,7 +976,7 @@ public class Matrix
 					for(int j = 0; j < res.cols(); j++)
 					{
 						double d = 0.0;
-						for(int k = 0; k < a.cols(); k++)
+						for(int k = 0; k < a.rows(); k++)
 							d += a.m_data.get(k)[i] * b.m_data.get(j)[k];
 						res.m_data.get(i)[j] = d;
 					}
@@ -968,7 +991,7 @@ public class Matrix
 					for(int j = 0; j < res.cols(); j++)
 					{
 						double d = 0.0;
-						for(int k = 0; k < a.cols(); k++)
+						for(int k = 0; k < a.rows(); k++)
 							d += a.m_data.get(k)[i] * b.m_data.get(k)[j];
 						res.m_data.get(i)[j] = d;
 					}
