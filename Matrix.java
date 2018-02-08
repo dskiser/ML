@@ -91,6 +91,23 @@ public class Matrix
 			}
 		}
 	}
+	
+	/// Creates Matrix from a Vec
+	public Matrix(Vec weights, int rows, int cols) {
+		if(rows*cols != weights.size())
+			throw new IllegalArgumentException("Matrix is incorrect size to hold vector");
+			
+		this.m_filename    = "";
+		this.m_attr_name   = new ArrayList<String>();
+		this.m_str_to_enum = new ArrayList<HashMap<String, Integer>>();
+		this.m_enum_to_str = new ArrayList<HashMap<Integer, String>>();
+		setSize(0, cols);
+		
+		for(int i=0; i<weights.size(); i+=cols) {
+			Vec row = new Vec(weights, i, cols);
+			this.takeVec(row);
+		}
+	}
 
 
 	/// Marshals this object into a Json DOM

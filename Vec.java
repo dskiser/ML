@@ -58,7 +58,7 @@ public class Vec
 		
 		int k = 0;
 		// insert intercept values into Vec
-		for(int i=0; i<numInter; i++) vals[k++] = M.get(0, i);
+		for(int i=0; i<M.cols(); i++) vals[k++] = M.get(0, i);
 		
 		// insert remaining values into Vec
 		for(int i=0; i<M.cols(); i++) {
@@ -162,6 +162,17 @@ public class Vec
 			throw new IllegalArgumentException("mismatching sizes");
 		for(int i = 0; i < len; i++)
 			vals[start + i] += scalar * that.get(i);
+	}
+	
+	public boolean equal(Vec that)
+	{
+		if(that.size() != this.size())
+			throw new IllegalArgumentException("mismatching sizes");
+		for(int i = 0; i < that.size(); i++) {
+			if(that.get(i) != this.get(i))
+				return false;
+		}
+		return true;
 	}
 
 	public double dotProduct(Vec that)

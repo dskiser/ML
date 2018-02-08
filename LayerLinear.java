@@ -36,6 +36,43 @@ class LayerLinear extends Layer {
 		activation = new Vec(Mx, 0, y_length);
 	}
 	
+	// Pass backprop only the weights for M, not b.
+	public Vec backprop(Vec weights, int prevBlameSize) {
+		// Convert Vec weights into transposed matrix weights
+		if(weights.size() % prevBlameSize != 0)
+			throw new IllegalArgumentException("Incorrect number of weights");
+		int numColumns = weights.size() / prevBlameSize;
+		Matrix M = new Matrix(weights, prevBlameSize, numColumns);
+		
+		
+		// Convert Vec blame into Matrix
+		Matrix blameMatrix = new Matrix(this.blame, this.blame.size(), 1);
+		
+		// Calculate previous blame
+		Matrix prevBlameM = Matrix.multiply(M, blameMatrix, true, false);
+		Vec prevBlame = new Vec(0, prevBlameM);
+		
+		return prevBlame;
+	}
+	
+	public static void testBackprop() 
+		throws TestFailedException {
+		LayerLinear test = new LayerLinear(3, 2);
+		double[] blame_values = { 1, 2 };
+		test.blame = new Vec(blame_values);
+		double[] weight_values = { 3, 0, 2, 4, 1, 5 };
+		Vec weights = new Vec(weight_values);
+		Vec prevBlame = test.backprop(weights, 2);
+		
+		double[] answer_values = { 11.0, 2.0, 12.0 };
+		Vec answer = new Vec(answer_values);
+		if(!prevBlame.equal(answer))
+			throw new TestFailedException("testBackprop");
+	}
+	
+	public void updateGradient(Vec x, Vec gradient) {}
+		
+		
 	public Vec ordinary_least_squares(Matrix X_start, Matrix Y) {
 
 		Matrix X = new Matrix(X_start.rows(), X_start.cols() + 1);
