@@ -13,5 +13,5 @@ abstract class Layer {
 	
 	abstract void activate(Vec weights, Vec x);
 	abstract Vec backprop(Vec weights, int blameLength);
-	abstract void updateGradient(Vec x, Vec gradient);
+	abstract Vec updateGradient(Vec x, Vec gradient);
 }

@@ -149,7 +149,24 @@ public class Vec
 		for(int i = 0; i < len; i++)
 			vals[start + i] += that.get(i);
 	}
-
+	
+	public Vec attach(Vec that) {
+		int new_length = this.size() + that.size();
+		Vec combined = new Vec(new_length);
+		
+		int k = 0;
+		// Insert first Vec into combined Vec
+		for(int i = 0; i < this.size(); i++) {
+			combined.set(k++, this.get(i));
+		}
+		// Insert second Vec into combined Vec
+		for(int i = 0; i < that.size(); i++) {
+			combined.set(k++, that.get(i));
+		}
+		
+		return combined;
+	}
+	
 	public void scale(double scalar)
 	{
 		for(int i = 0; i < len; i++)
@@ -183,6 +200,18 @@ public class Vec
 		for(int i = 0; i < len; i++)
 			d += get(i) * that.get(i);
 		return d;
+	}
+	
+	public Matrix outerProduct(Vec that) {
+		Matrix op = new Matrix(0, that.size());
+		for(int n = 0; n < this.size(); n++) {
+			double[] row = new double[that.size()];
+			for(int p = 0; p < that.size(); p++) {
+				row[p] = this.get(n) * that.get(p);
+			}
+			op.takeRow(row);
+		}
+		return op;
 	}
 
 	public double squaredDistance(Vec that)

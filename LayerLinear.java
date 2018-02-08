@@ -70,7 +70,45 @@ class LayerLinear extends Layer {
 			throw new TestFailedException("testBackprop");
 	}
 	
-	public void updateGradient(Vec x, Vec gradient) {}
+	public Vec updateGradient(Vec x, Vec weights) {
+		// Create intercept Vec
+		int interceptLength = this.blame.size();
+		Vec b = new Vec(weights, 0, interceptLength);
+		
+		// Create Matrix M
+		int colsM = (weights.size() / interceptLength) - 1;
+		Vec m_weights = new Vec(weights, interceptLength, weights.size()-interceptLength);
+		Matrix M = new Matrix(m_weights, interceptLength, colsM);
+		
+		// Update b
+		b.addScaled(1, this.blame);
+		
+		// Update M
+		Matrix update = blame.outerProduct(x);
+		M.addScaled(update, 1);
+		Vec m = new Vec(0, M); // convert M to Vec m
+		
+		// Recombine b and M into updated Vec of weights
+		weights = b.attach(m);	
+		return weights;
+	}
+	
+	public static void testUpdateGradient() 
+		throws TestFailedException {
+		LayerLinear test = new LayerLinear(3, 2);
+		double[] blame_values = { 1, 2 };
+		test.blame = new Vec(blame_values);
+		double[] weight_values = { 1, 6, 3, 0, 2, 4, 1, 5 };
+		Vec weights = new Vec(weight_values);
+		double[] x_values = { 9, 3, 7 };
+		Vec x = new Vec(x_values);
+		weights = test.updateGradient(x, weights);
+		
+		double[] answer_values = { 2.0,8.0,12.0,3.0,9.0,22.0,7.0,19.0 };
+		Vec answer = new Vec(answer_values);
+		if(!weights.equal(answer))
+			throw new TestFailedException("testUpdateGradient");
+	}
 		
 		
 	public Vec ordinary_least_squares(Matrix X_start, Matrix Y) {
