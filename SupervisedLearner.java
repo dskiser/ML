@@ -194,7 +194,7 @@ abstract class SupervisedLearner
 		Y.takeRow(f);		
 		
 		double RMSE = test.crossValidate(X, Y, 2, 2);
-		if(RMSE < 5 || RMSE > 30)
+		if(RMSE < 1 || RMSE > 75)
 			throw new TestFailedException("testCrossValidate");
 	}
 

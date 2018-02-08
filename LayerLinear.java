@@ -1,5 +1,3 @@
-import java.util.Random;
-
 class TestFailedException extends Exception {
 	String test;
 	
@@ -91,13 +89,12 @@ class LayerLinear extends Layer {
 	public static void testOrdinary_least_squares(
 							int inputs, int outputs, boolean verbose) 
 		throws TestFailedException {
-		Random d = new Random();
 		
 		int weight_num = outputs + (inputs * outputs);
 		// Generate number of random weights specified by weight_num
 		Vec weights = new Vec(weight_num);
 		for(int i=0; i<weight_num; i++) {
-			double weight = -10 + (20 * d.nextDouble());
+			double weight = -10 + (20 * MyRandom.getdouble());
 			weights.set(i, weight);
 		}
 		
@@ -105,7 +102,7 @@ class LayerLinear extends Layer {
 		Matrix X = new Matrix(0, inputs);
 		for(int i=0; i<50; i++) {
 			double[] row = new double[inputs];
-			for(int j=0; j<inputs; j++) row[j] = -25 + (50 * d.nextDouble());
+			for(int j=0; j<inputs; j++) row[j] = -25 + (50 * MyRandom.getdouble());
 			X.takeRow(row);
 		}
 		
@@ -130,7 +127,7 @@ class LayerLinear extends Layer {
 			double[] column = Y.m_data.get(i);
 			double[] noisy_column = new double[column.length];
 			for(int j=0; j<column.length; j++) {
-				double randomIncrement = -25 + (50 * d.nextGaussian());
+				double randomIncrement = -25 + (50 * MyRandom.getgaussian());
 				noisy_column[j] = column[j] + randomIncrement;
 			}
 			Y.m_data.set(i, noisy_column);

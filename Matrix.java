@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.lang.StringBuilder;
 import java.util.Comparator;
-import java.util.Random;
 
 
 /// This stores a matrix, A.K.A. data set, A.K.A. table. Each element is
@@ -212,7 +211,8 @@ public class Matrix
 		}
 		finally
 		{
-			s.close();
+			if(s != null)
+				s.close();
 		}
 	}
 
@@ -699,7 +699,6 @@ public class Matrix
 	
 	/// Shuffle the rows of a matrix
 	public void shuffle() {
-		Random d = new Random();
 		
 		int length = this.rows();
 		int[] indexes = new int[length];
@@ -708,7 +707,7 @@ public class Matrix
 		}
 		for(int i=length-1; i>0; i--) {
 			int temp = indexes[i];
-			int swap_index = d.nextInt(length);
+			int swap_index = MyRandom.getinteger(i);
 			indexes[i] = indexes[swap_index]; 
 			indexes[swap_index] = temp;
 		}
@@ -719,7 +718,6 @@ public class Matrix
 	
 	/// Test shuffle
 	public static void testShuffle() {
-		Random d = new Random();
 		Matrix test = new Matrix(25, 3);
 		test.fill(0.0);
 		double[] values = { 1.0, 1.0, 1.0 };
