@@ -181,6 +181,17 @@ public class Vec
 			vals[start + i] += scalar * that.get(i);
 	}
 	
+	public Vec sum(double scalar, Vec that)
+	{
+		if(that.size() != this.size())
+			throw new IllegalArgumentException("mismatching sizes");
+		Vec sum = new Vec(that.size());
+		for(int i = 0; i < that.size(); i++) {
+			sum.set(i, scalar * (that.get(i) + this.get(i)));
+		}
+		return sum;
+	}
+	
 	public boolean equal(Vec that)
 	{
 		if(that.size() != this.size())

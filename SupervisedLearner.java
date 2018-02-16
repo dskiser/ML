@@ -8,12 +8,14 @@ import java.util.ArrayList;
 
 abstract class SupervisedLearner 
 {
-	protected ArrayList<LayerLinear> layerCollection;
+	protected ArrayList<Layer> layerCollection;
 	protected ArrayList<Vec> layerWeights;
+	protected ArrayList<Vec> layerGradients;
 	
 	SupervisedLearner() {
-		layerCollection = new ArrayList<LayerLinear>(5);
-		layerWeights = new ArrayList<Vec>(5);
+		layerCollection = new ArrayList<Layer>(1);
+		layerWeights = new ArrayList<Vec>(1);
+		layerGradients = new ArrayList<Vec>(1);
 	}
 	
 	/// Return the name of this learner

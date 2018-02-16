@@ -36,61 +36,65 @@ class LayerLinear extends Layer {
 		activation = new Vec(Mx, 0, y_length);
 	}
 	
-	// Pass backprop only the weights for M, not b.
-	public Vec backprop(Vec weights, int prevBlameSize) {
-		// Convert Vec weights into transposed matrix weights
-		if(weights.size() % prevBlameSize != 0)
+	public void backprop(Vec weights, Vec prevBlame) {
+		// Remove b from weights
+		Vec mweights = new Vec(weights, this.num_outputs, weights.size() - this.num_outputs);
+		
+		// Convert Vec mweights into transposed matrix weights
+		if(mweights.size() % this.num_outputs != 0)
 			throw new IllegalArgumentException("Incorrect number of weights");
-		int numColumns = weights.size() / prevBlameSize;
-		Matrix M = new Matrix(weights, prevBlameSize, numColumns);
+		int numColumns = mweights.size() / this.num_outputs;
+		Matrix M = new Matrix(mweights, this.num_outputs, numColumns);
 		
 		
-		// Convert Vec blame into Matrix
-		Matrix blameMatrix = new Matrix(this.blame, this.blame.size(), 1);
+		// Convert Vec prevBlame into Matrix
+		Matrix prevBlameMatrix = new Matrix(prevBlame, prevBlame.size(), 1);
 		
-		// Calculate previous blame
-		Matrix prevBlameM = Matrix.multiply(M, blameMatrix, true, false);
-		Vec prevBlame = new Vec(0, prevBlameM);
-		
-		return prevBlame;
+		// Calculate blame of current layer
+		Matrix currentBlame = Matrix.multiply(M, prevBlameMatrix, true, false);
+		this.blame = new Vec(0, currentBlame);
 	}
 	
 	public static void testBackprop() 
 		throws TestFailedException {
 		LayerLinear test = new LayerLinear(3, 2);
 		double[] blame_values = { 1, 2 };
-		test.blame = new Vec(blame_values);
-		double[] weight_values = { 3, 0, 2, 4, 1, 5 };
+		Vec prevBlame = new Vec(blame_values);
+		double[] weight_values = { 9, 9, 3, 0, 2, 4, 1, 5 };
 		Vec weights = new Vec(weight_values);
-		Vec prevBlame = test.backprop(weights, 2);
+		test.backprop(weights, prevBlame);
 		
 		double[] answer_values = { 11.0, 2.0, 12.0 };
 		Vec answer = new Vec(answer_values);
-		if(!prevBlame.equal(answer))
+		if(!test.blame.equal(answer))
 			throw new TestFailedException("testBackprop");
 	}
 	
 	public Vec updateGradient(Vec x, Vec weights) {
-		// Create intercept Vec
-		int interceptLength = this.blame.size();
+		// Create bias Vec
+		int interceptLength = num_outputs;
 		Vec b = new Vec(weights, 0, interceptLength);
 		
-		// Create Matrix M
-		int colsM = (weights.size() / interceptLength) - 1;
-		Vec m_weights = new Vec(weights, interceptLength, weights.size()-interceptLength);
-		Matrix M = new Matrix(m_weights, interceptLength, colsM);
-		
-		// Update b
-		b.addScaled(1, this.blame);
-		
-		// Update M
-		Matrix update = blame.outerProduct(x);
-		M.addScaled(update, 1);
-		Vec m = new Vec(0, M); // convert M to Vec m
-		
-		// Recombine b and M into updated Vec of weights
-		weights = b.attach(m);	
-		return weights;
+		// Create weight Vec
+		Vec m = new Vec(weights, interceptLength, weights.size()-interceptLength);
+		// Find gradients for bias
+		double[] gradients = new double[weights.size()];
+		int k = 0;
+		int pos = 0;
+		for(int i = 0; i < this.blame.size(); i++) {
+				gradients[k] = this.blame.get(i);
+				k++;
+		}
+			
+		// Find gradients for weights
+		for(int j = 0; j < this.blame.size(); j++) {
+			for(int i = 0; i < x.size(); i++) {
+				gradients[k] = x.get(i)*this.blame.get(j);
+				k++;
+			}
+		}
+		Vec gradientVec = new Vec(gradients);
+		return gradientVec;
 	}
 	
 	public static void testUpdateGradient() 

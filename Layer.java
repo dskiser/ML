@@ -9,9 +9,10 @@ abstract class Layer {
 		blame = new Vec(outputs);
 		num_inputs = inputs;
 		num_outputs = outputs;
+		
 	}
 	
 	abstract void activate(Vec weights, Vec x);
-	abstract Vec backprop(Vec weights, int blameLength);
+	abstract void backprop(Vec weights, Vec prevBlame);
 	abstract Vec updateGradient(Vec x, Vec gradient);
 }
