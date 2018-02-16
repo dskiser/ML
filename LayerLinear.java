@@ -95,25 +95,7 @@ class LayerLinear extends Layer {
 		}
 		Vec gradientVec = new Vec(gradients);
 		return gradientVec;
-	}
-	
-	public static void testUpdateGradient() 
-		throws TestFailedException {
-		LayerLinear test = new LayerLinear(3, 2);
-		double[] blame_values = { 1, 2 };
-		test.blame = new Vec(blame_values);
-		double[] weight_values = { 1, 6, 3, 0, 2, 4, 1, 5 };
-		Vec weights = new Vec(weight_values);
-		double[] x_values = { 9, 3, 7 };
-		Vec x = new Vec(x_values);
-		weights = test.updateGradient(x, weights);
-		
-		double[] answer_values = { 2.0,8.0,12.0,3.0,9.0,22.0,7.0,19.0 };
-		Vec answer = new Vec(answer_values);
-		if(!weights.equal(answer))
-			throw new TestFailedException("testUpdateGradient");
-	}
-		
+	}		
 		
 	public Vec ordinary_least_squares(Matrix X_start, Matrix Y) {
 

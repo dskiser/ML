@@ -44,11 +44,11 @@ class Main
 			LayerLinear.testOrdinary_least_squares(8, 2, false);
 			LayerLinear.testActivate(false);
 			LayerLinear.testBackprop();
-			//LayerLinear.testUpdateGradient();
-			NeuralNet.testGradient();
+			//NeuralNet.testGradient();
 			NeuralNet.testCrossValidate();
 			NeuralNet.testCrossValidate2();
 			NeuralNet.testComputeSumSquaredError();
+			//NeuralNet.testRefineWeights();
 		} catch (TestFailedException exc) {
 			System.out.println(exc);
 		}
@@ -74,6 +74,8 @@ class Main
 		double RMSE = 
 			housingModel.crossValidate(housingFeatures, housingLabels, 5, 10);
 		System.out.println(RMSE);
-
+		System.out.println();
+		
+		
 	}
 }

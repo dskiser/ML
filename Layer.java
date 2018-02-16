@@ -12,6 +12,14 @@ abstract class Layer {
 		
 	}
 	
+	Layer(int inputs) {
+		
+		activation = new Vec(inputs);
+		blame = new Vec(inputs);
+		num_inputs = inputs;
+	
+	}
+	
 	abstract void activate(Vec weights, Vec x);
 	abstract void backprop(Vec weights, Vec prevBlame);
 	abstract Vec updateGradient(Vec x, Vec gradient);
