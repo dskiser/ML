@@ -187,7 +187,7 @@ public class Vec
 			throw new IllegalArgumentException("mismatching sizes");
 		Vec sum = new Vec(that.size());
 		for(int i = 0; i < that.size(); i++) {
-			sum.set(i, scalar * (that.get(i) - this.get(i)));
+			sum.set(i, ((scalar*that.get(i)) + this.get(i)));
 		}
 		return sum;
 	}
@@ -201,6 +201,21 @@ public class Vec
 				return false;
 		}
 		return true;
+	}
+	
+	/// Returns the index of the max value in Vec
+	public int maxIndex()
+	{
+		int index = 0;
+		double value = 0.0;
+		for(int i = 0; i < len; i++) {
+			double new_value = get(i);
+			if(new_value > value) {
+				index = i;
+				value = new_value;
+			}
+		}
+		return index;
 	}
 
 	public double dotProduct(Vec that)

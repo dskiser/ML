@@ -36,7 +36,7 @@ class LayerLinear extends Layer {
 		activation = new Vec(Mx, 0, y_length);
 	}
 	
-	public void backprop(Vec weights, Vec prevBlame) {
+	public Vec backprop(Vec weights) {
 		// Remove b from weights
 		Vec mweights = new Vec(weights, this.num_outputs, weights.size() - this.num_outputs);
 		
@@ -47,30 +47,17 @@ class LayerLinear extends Layer {
 		Matrix M = new Matrix(mweights, this.num_outputs, numColumns);
 		
 		
-		// Convert Vec prevBlame into Matrix
-		Matrix prevBlameMatrix = new Matrix(prevBlame, prevBlame.size(), 1);
+		// Convert Vec lame into Matrix
+		Matrix BlameMatrix = new Matrix(this.blame, this.blame.size(), 1);
 		
 		// Calculate blame of current layer
-		Matrix currentBlame = Matrix.multiply(M, prevBlameMatrix, true, false);
-		this.blame = new Vec(0, currentBlame);
-	}
-	
-	public static void testBackprop() 
-		throws TestFailedException {
-		LayerLinear test = new LayerLinear(3, 2);
-		double[] blame_values = { 1, 2 };
-		Vec prevBlame = new Vec(blame_values);
-		double[] weight_values = { 9, 9, 3, 0, 2, 4, 1, 5 };
-		Vec weights = new Vec(weight_values);
-		test.backprop(weights, prevBlame);
+		Matrix PrevBlame = Matrix.multiply(M, BlameMatrix, true, false);
+		Vec prevBlame = new Vec(0, PrevBlame);
 		
-		double[] answer_values = { 11.0, 2.0, 12.0 };
-		Vec answer = new Vec(answer_values);
-		if(!test.blame.equal(answer))
-			throw new TestFailedException("testBackprop");
+		return prevBlame;
 	}
 	
-	public Vec updateGradient(Vec x, Vec weights) {
+	public void updateGradient(Vec x, Vec weights) {
 		// Create bias Vec
 		int interceptLength = num_outputs;
 		Vec b = new Vec(weights, 0, interceptLength);
@@ -78,23 +65,19 @@ class LayerLinear extends Layer {
 		// Create weight Vec
 		Vec m = new Vec(weights, interceptLength, weights.size()-interceptLength);
 		// Find gradients for bias
-		double[] gradients = new double[weights.size()];
 		int k = 0;
-		int pos = 0;
 		for(int i = 0; i < this.blame.size(); i++) {
-				gradients[k] = this.blame.get(i);
+				gradients.set(k, gradients.get(k) + this.blame.get(i));
 				k++;
 		}
 			
 		// Find gradients for weights
 		for(int j = 0; j < this.blame.size(); j++) {
 			for(int i = 0; i < x.size(); i++) {
-				gradients[k] = x.get(i)*this.blame.get(j);
+				gradients.set(k, gradients.get(k) + x.get(i)*this.blame.get(j));
 				k++;
 			}
 		}
-		Vec gradientVec = new Vec(gradients);
-		return gradientVec;
 	}		
 		
 	public Vec ordinary_least_squares(Matrix X_start, Matrix Y) {

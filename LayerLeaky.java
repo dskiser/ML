@@ -1,20 +1,22 @@
-class LayerTanh extends Layer {
+class LayerLeaky extends Layer {
 	
-	LayerTanh(int inputs) {
+	LayerLeaky(int inputs) {
 		super(inputs);
 	}
 	
 	public void activate(Vec weights, Vec x) {
 		activation = new Vec(x.size());
 		for(int i = 0; i < x.size(); i++) {
-			activation.set(i, Math.tanh(x.get(i)));
+			if(x.get(i) < 0) activation.set(i, 0.01 * x.get(i));
+			else activation.set(i, x.get(i));
 		}
 	}
 	
 	public Vec backprop(Vec weights) {
 		Vec prevBlame = new Vec(blame.size());
 		for(int i = 0; i < blame.size(); i++) {
-			prevBlame.set(i, blame.get(i) * (1.0 - (activation.get(i) * activation.get(i))));
+			if(activation.get(i) < 0) prevBlame.set(i, blame.get(i) * 0.01);
+			else prevBlame.set(i, blame.get(i));
 		}
 		return prevBlame;
 	}

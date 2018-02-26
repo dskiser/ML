@@ -28,7 +28,7 @@ abstract class SupervisedLearner
 	abstract Vec predict(Vec in);
 
 	/// Measures the misclassifications with the provided test data
-	int countMisclassifications(Matrix features, Matrix labels)
+	int countMisclassifications(Matrix features, Matrix labels, boolean onehot)
 	{
 		if(features.rows() != labels.rows())
 			throw new IllegalArgumentException("Mismatching number of rows");
@@ -36,12 +36,26 @@ abstract class SupervisedLearner
 		for(int i = 0; i < features.rows(); i++)
 		{
 			Vec feat = features.row(i);
+			//System.out.println("x: " + feat);
 			Vec pred = predict(feat);
+			//System.out.println("One hot representation: ");
+			//System.out.println(pred);
+			if(onehot) {
+				int max = pred.maxIndex();
+				double[] maxrow = { (double) max };
+				pred = new Vec(maxrow);
+			}
+			//System.out.println("Digit representation: ");
+			//System.out.println(pred);
 			Vec lab = labels.row(i);
+			//System.out.println("Target: ");
+			//System.out.print(lab);
 			for(int j = 0; j < lab.size(); j++)
 			{
-				if(pred.get(j) != lab.get(j))
+				if(pred.get(j) != lab.get(j)) {
 					mis++;
+					//System.out.println(" misclassified");
+				}
 			}
 		}
 		return mis;
@@ -65,7 +79,6 @@ abstract class SupervisedLearner
 		return sumSquaredError;
 	}
 		
-	
 	/// Cross validation with m repetitions and n folds
 	double crossValidate(Matrix X, Matrix Y, int reps, int folds) {
 		if(X.rows() != Y.rows())
@@ -150,7 +163,7 @@ abstract class SupervisedLearner
 	/// Test crossValidate()
 	static void testCrossValidate()
 			throws TestFailedException {
-		NeuralNet test = new NeuralNet();
+		NeuralNet test = new NeuralNet(1.0, 1);
 		LayerLinear testlinear = new LayerLinear(3, 2);
 		test.layerCollection.add(testlinear);
 		
@@ -202,7 +215,7 @@ abstract class SupervisedLearner
 
 	static void testComputeSumSquaredError() 
 			throws TestFailedException {
-		NeuralNet test = new NeuralNet();
+		NeuralNet test = new NeuralNet(1.0, 1);
 		LayerLinear testlinear = new LayerLinear(3, 2);
 		test.layerCollection.add(testlinear);
 		
@@ -225,7 +238,7 @@ abstract class SupervisedLearner
 			labels.takeRow(value);
 		}
 				
-		NeuralNet test = new NeuralNet();
+		NeuralNet test = new NeuralNet(1.0, 1);
 		LayerLinear testlinear = new LayerLinear(1, 1);
 		test.layerCollection.add(testlinear);
 		
