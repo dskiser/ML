@@ -80,6 +80,15 @@ public class Vec
 	{
 		return len;
 	}
+	
+	// Returns a double[] array version of Vec
+	public double[] toArray() {
+		double[] array = new double[this.size()];
+		for(int i = 0; i < this.size(); i++) 
+			array[i] = this.get(i);
+		return array;
+	}
+		
 
 	public double get(int index)
 	{

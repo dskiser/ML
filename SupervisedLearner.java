@@ -28,7 +28,7 @@ abstract class SupervisedLearner
 	abstract Vec predict(Vec in);
 
 	/// Measures the misclassifications with the provided test data
-	int countMisclassifications(Matrix features, Matrix labels, boolean onehot)
+	int countMisclassifications(Matrix features, Matrix labels)
 	{
 		if(features.rows() != labels.rows())
 			throw new IllegalArgumentException("Mismatching number of rows");
@@ -40,11 +40,13 @@ abstract class SupervisedLearner
 			Vec pred = predict(feat);
 			//System.out.println("One hot representation: ");
 			//System.out.println(pred);
+			/*
 			if(onehot) {
 				int max = pred.maxIndex();
 				double[] maxrow = { (double) max };
 				pred = new Vec(maxrow);
 			}
+			*/
 			//System.out.println("Digit representation: ");
 			//System.out.println(pred);
 			Vec lab = labels.row(i);

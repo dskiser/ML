@@ -25,6 +25,7 @@ class NeuralNet extends SupervisedLearner {
 	}
 	
 	public void train(Matrix X, Matrix Y) {
+		//System.out.println("train in NN called");
 		int cycles = 1;
 		for(int j = 0; j < cycles; j++) {
 			// Create array of shuffled indexes
@@ -41,15 +42,38 @@ class NeuralNet extends SupervisedLearner {
 			}
 		
 			// Randomly visit each row of X and Y, refining weights for each visit
+			int stop = 0;
+			// Identify negative vs positive diagnoses - hypothyroid only
+			//double[] negative = { 1.0, 0.0, 0.0, 0.0 };
+			//double[] compensated = { 0.0, 1.0, 0.0, 0.0};
+			//double[] primary = { 0.0, 0.0, 1.0, 0.0 };
+			//Vec neg = new Vec(negative);
+			//Vec com = new Vec(compensated);
+			//Vec pri = new Vec(primary);
 			for(int i : randindex) {
 				Vec x = X.row(i);
 				Vec y = Y.row(i);
-				this.refineWeights(x, y, 0.025);
+				//if(y.equal(neg))
+					this.refineWeights(x, y, 0.01);
+				//else if(y.equal(com))
+					//this.refineWeights(x, y, 0.19);
+				//else if(y.equal(pri))
+					//this.refineWeights(x, y, 0.19);
+				//else
+					//this.refineWeights(x, y, 0.19);
+				/*
+				if(count++ == batch_size) {
+					count = 0;
+					break;
+				}
+				*/
+				if(stop == 0) break; //only use 1 pattern at a time
 			}
 		}
 	}
 	
 	public void refineWeights(Vec x, Vec y, double learning_rate) {
+		//System.out.println("Refining weights ... ");
 		//System.out.println("In refineWeights: " + layerWeights.get(0).get(0));
 		Vec weights = layerWeights.get(0);
 		this.predict(x);
@@ -257,12 +281,12 @@ class NeuralNet extends SupervisedLearner {
 		}
 		for(int i = 0; i < 10000; i++) {
 			GDtest.train(X, Y);
-			/*
+			
 			int row_index = MyRandom.getinteger(patterns);
 			Vec x_sample = X.row(row_index);
 			Vec y_sample = Y.row(row_index);
 			GDtest.refineWeights(x_sample, y_sample, 0.001);
-			*/
+			
 		}
 		Vec GDweights = GDtest.layerWeights.get(0);
 		//System.out.println("GD weights: ");

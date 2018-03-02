@@ -157,7 +157,9 @@ public class Matrix
 					Json.StringParser sp = new Json.StringParser(line);
 					sp.advance(10);
 					sp.skipWhitespace();
-					String attrName = sp.untilWhitespace();
+					sp.advance(1);// added line
+					String attrName = sp.until('\'');// modified line
+					sp.advance(1);// added line
 					m_attr_name.add(attrName);
 					sp.skipWhitespace();
 					int valCount = 0;

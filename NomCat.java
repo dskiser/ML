@@ -63,6 +63,11 @@ public class NomCat extends PreprocessingOperation
 			}
 		}
 	}
+	
+	// Calculate number of columns in untransformed data
+	public int origColumns() {
+		return m_vals.length;
+	}
 
 	/// Re-encode categorical distributions as nominal values by finding the mode
 	@Override

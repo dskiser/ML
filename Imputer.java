@@ -11,7 +11,7 @@ public class Imputer extends PreprocessingOperation
 	private Matrix m_template = new Matrix();
 	
 	/// Creates a new Imputer instance
-	public Imputer() {}
+	public Imputer() { }
 
 	/// Calculates the mean or mode for each column as appropriate.
 	public void train(Matrix data)
@@ -23,9 +23,14 @@ public class Imputer extends PreprocessingOperation
 		{
 			if (data.valueCount(i) == 0)
 				m_centroid[i] = data.columnMean(i);
-			else
+			else 
 				m_centroid[i] = data.mostCommonValue(i);
+			if(Double.isNaN(m_centroid[i]))
+				m_centroid[i] = 0.0;
+			
+			//System.out.print(m_centroid[i] + " ");
 		}
+		//System.out.println();
 	}
 	
 	/// Returns an empty matrix that has the necessary meta-data.
