@@ -11,6 +11,8 @@ abstract class SupervisedLearner
 	protected ArrayList<Layer> layerCollection;
 	protected ArrayList<Vec> layerWeights;
 	protected ArrayList<Vec> layerGradients;
+	Vec feat, pred, lab;
+	int mis;
 	
 	SupervisedLearner() {
 		layerCollection = new ArrayList<Layer>(1);
@@ -32,12 +34,12 @@ abstract class SupervisedLearner
 	{
 		if(features.rows() != labels.rows())
 			throw new IllegalArgumentException("Mismatching number of rows");
-		int mis = 0;
+		mis = 0;
 		for(int i = 0; i < features.rows(); i++)
 		{
-			Vec feat = features.row(i);
+			feat = features.row(i);
 			//System.out.println("x: " + feat);
-			Vec pred = predict(feat);
+			pred = predict(feat);
 			//System.out.println("One hot representation: ");
 			//System.out.println(pred);
 			/*
@@ -49,7 +51,7 @@ abstract class SupervisedLearner
 			*/
 			//System.out.println("Digit representation: ");
 			//System.out.println(pred);
-			Vec lab = labels.row(i);
+			lab = labels.row(i);
 			//System.out.println("Target: ");
 			//System.out.print(lab);
 			for(int j = 0; j < lab.size(); j++)
@@ -64,21 +66,25 @@ abstract class SupervisedLearner
 	}
 	
 	/// Compute sum squared error
-	double computeSumSquaredError(Matrix training, Matrix predicted) {
-		if(training.rows() != predicted.rows())
+	double computeRootMeanSquaredError(Matrix testX, Matrix testY) {
+		if(testX.rows() != testY.rows())
 			throw new IllegalArgumentException("Mismatching number of rows");
 		double sumSquaredError = 0.0;
-		for(int i=0; i < training.rows(); i++)
+		Vec tr, pred, act;
+		for(int i=0; i < testX.rows(); i++)
 		{
-			Vec tr = training.row(i);
-			Vec pred = predicted.row(i);
+			tr = testX.row(i);
+			pred = predict(tr);
+			act = testY.row(i);
 			for(int j = 0; j < tr.size(); j++)
 			{
-				double errorSquared = Math.pow((tr.get(j) - pred.get(j)), 2);
+				double errorSquared = Math.pow((pred.get(j) - act.get(j)), 2);
+				//System.out.println(errorSquared + "= (" + pred.get(j) + " - " + act.get(j) + ")2");
 				sumSquaredError += errorSquared;
 			}
 		}
-		return sumSquaredError;
+		double RMSE = sumSquaredError / testX.rows();
+		return RMSE;
 	}
 		
 	/// Cross validation with m repetitions and n folds
@@ -152,7 +158,7 @@ abstract class SupervisedLearner
 				}
 				*/
 				// Compute sumSquareError of each fold
-				totalSSE += computeSumSquaredError(testY, Y_hat);
+				//totalSSE += computeSumSquaredError(testY, Y_hat);
 						
 			}
 		}
@@ -226,7 +232,7 @@ abstract class SupervisedLearner
 		Matrix actual = new Matrix(2, 2);
 		actual.fill(2.0);
 		
-		double SSE = test.computeSumSquaredError(actual, pred);
+		double SSE = 0.0;// = test.computeSumSquaredError(actual, pred);
 		if(SSE != 4.0) throw new TestFailedException("computeSumSquaredError");
 	}
 	

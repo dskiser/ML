@@ -1,7 +1,7 @@
 import java.util.Random;
 
 class MyRandom {
-	static Random d = new Random(12347);
+	static Random d = new Random(12349);
 	
 	static double getdouble() {
 		return d.nextDouble();

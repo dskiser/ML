@@ -1,5 +1,7 @@
 class LayerLeaky extends Layer {
 	
+	protected Vec prevBlame;
+	
 	LayerLeaky(int inputs) {
 		super(inputs);
 	}
@@ -13,7 +15,7 @@ class LayerLeaky extends Layer {
 	}
 	
 	public Vec backprop(Vec weights) {
-		Vec prevBlame = new Vec(blame.size());
+		prevBlame = new Vec(blame.size());
 		for(int i = 0; i < blame.size(); i++) {
 			if(activation.get(i) < 0) prevBlame.set(i, blame.get(i) * 0.01);
 			else prevBlame.set(i, blame.get(i));

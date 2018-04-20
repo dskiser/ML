@@ -12,23 +12,31 @@ class TestFailedException extends Exception {
 
 class LayerLinear extends Layer {
 	
+	Vec b, m, Mx, M_row, mweights, prevBlame;
+	Matrix M, BlameMatrix, PrevBlame;
+	int x_length, y_length, numColumns, weight_count, k, interceptLength; 
+	double Mx_entry;
+	
 	LayerLinear(int inputs, int outputs) {
 		super(inputs, outputs);
+		
+		gradients = new Vec((inputs + 1) * outputs);
 	}
 	
 	public void activate(Vec weights, Vec x) {
-		int x_length = num_inputs;
-		int y_length = num_outputs;
+		x_length = num_inputs;
+		y_length = num_outputs;
 		// Define and store values in b
-		Vec b = new Vec(weights, 0, y_length);
+		b = new Vec(weights, 0, y_length);
 		// Define Mx
-		Vec Mx = new Vec(y_length);
+		Mx = new Vec(y_length);
 		// For each value in x, calculate M_row_i*x_i
-		int weight_count = y_length;
+		weight_count = y_length;
 		for(int i=0; i<y_length; i++) {
-			Vec M_row = new Vec(weights, weight_count, x_length);
+			M_row = new Vec(weights, weight_count, x_length);
 			weight_count += x_length;
-			double Mx_entry = M_row.dotProduct(x);
+			//System.out.println("x: " + x.size() + " M: " + M_row.size());
+			Mx_entry = M_row.dotProduct(x);
 			Mx.set(i, Mx_entry);
 		}
 		// Mx + b
@@ -38,34 +46,34 @@ class LayerLinear extends Layer {
 	
 	public Vec backprop(Vec weights) {
 		// Remove b from weights
-		Vec mweights = new Vec(weights, this.num_outputs, weights.size() - this.num_outputs);
+		mweights = new Vec(weights, this.num_outputs, weights.size() - this.num_outputs);
 		
 		// Convert Vec mweights into transposed matrix weights
 		if(mweights.size() % this.num_outputs != 0)
 			throw new IllegalArgumentException("Incorrect number of weights");
-		int numColumns = mweights.size() / this.num_outputs;
-		Matrix M = new Matrix(mweights, this.num_outputs, numColumns);
+		numColumns = mweights.size() / this.num_outputs;
+		M = new Matrix(mweights, this.num_outputs, numColumns);
 		
 		
 		// Convert Vec lame into Matrix
-		Matrix BlameMatrix = new Matrix(this.blame, this.blame.size(), 1);
+		BlameMatrix = new Matrix(this.blame, this.blame.size(), 1);
 		
 		// Calculate blame of current layer
-		Matrix PrevBlame = Matrix.multiply(M, BlameMatrix, true, false);
-		Vec prevBlame = new Vec(0, PrevBlame);
+		PrevBlame = Matrix.multiply(M, BlameMatrix, true, false);
+		prevBlame = new Vec(0, PrevBlame);
 		
 		return prevBlame;
 	}
 	
 	public void updateGradient(Vec x, Vec weights) {
 		// Create bias Vec
-		int interceptLength = num_outputs;
-		Vec b = new Vec(weights, 0, interceptLength);
+		interceptLength = num_outputs;
+		b = new Vec(weights, 0, interceptLength);
 		
 		// Create weight Vec
-		Vec m = new Vec(weights, interceptLength, weights.size()-interceptLength);
+		m = new Vec(weights, interceptLength, weights.size()-interceptLength);
 		// Find gradients for bias
-		int k = 0;
+		k = 0;
 		for(int i = 0; i < this.blame.size(); i++) {
 				gradients.set(k, gradients.get(k) + this.blame.get(i));
 				k++;

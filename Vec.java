@@ -82,8 +82,9 @@ public class Vec
 	}
 	
 	// Returns a double[] array version of Vec
+	double[] array;
 	public double[] toArray() {
-		double[] array = new double[this.size()];
+		array = new double[this.size()];
 		for(int i = 0; i < this.size(); i++) 
 			array[i] = this.get(i);
 		return array;
@@ -159,9 +160,11 @@ public class Vec
 			vals[start + i] += that.get(i);
 	}
 	
+	int new_length;
+	Vec combined;
 	public Vec attach(Vec that) {
-		int new_length = this.size() + that.size();
-		Vec combined = new Vec(new_length);
+		new_length = this.size() + that.size();
+		combined = new Vec(new_length);
 		
 		int k = 0;
 		// Insert first Vec into combined Vec
@@ -190,11 +193,12 @@ public class Vec
 			vals[start + i] += scalar * that.get(i);
 	}
 	
+	protected Vec sum;
 	public Vec sum(double scalar, Vec that)
 	{
 		if(that.size() != this.size())
 			throw new IllegalArgumentException("mismatching sizes");
-		Vec sum = new Vec(that.size());
+		sum = new Vec(that.size());
 		for(int i = 0; i < that.size(); i++) {
 			sum.set(i, ((scalar*that.get(i)) + this.get(i)));
 		}
@@ -226,6 +230,17 @@ public class Vec
 		}
 		return index;
 	}
+	
+	/// Returns the sum of values in Vec
+	protected double summation;
+	public double summation() 
+	{
+		Vec ones = new Vec(this.size());
+		ones.fill(1.0);
+		summation = this.dotProduct(ones);
+		
+		return summation;
+	}
 
 	public double dotProduct(Vec that)
 	{
@@ -248,20 +263,31 @@ public class Vec
 		}
 		return op;
 	}
-
+	double d, t;
 	public double squaredDistance(Vec that)
 	{
 		if(that.size() != this.size())
 			throw new IllegalArgumentException("mismatching sizes");
-		double d = 0.0;
+		d = 0.0;
 		for(int i = 0; i < len; i++)
 		{
-			double t = get(i) - that.get(i);
+			t = get(i) - that.get(i);
 			d += (t * t);
 		}
 		return d;
 	}
+	
+	Vec original;
+	public void reverse() {
+		original = new Vec(0);
+		original.copy(this);
+		for(int i = 0; i < this.size(); i++) {
+			this.set(i, original.get(this.size() - i - 1));
+		}
+	}	
 }
+
+	
 
 
 
@@ -302,6 +328,7 @@ class Tensor extends Vec
 	/// Padding is computed as necessary to fill the the out tensor.
 	/// filter is the filter to convolve with in.
 	/// If flipFilter is true, then the filter is flipped in all dimensions.
+	protected static int[] kinner, kouter, stepInner, stepFilter, stepOuter;
 	static void convolve(Tensor in, Tensor filter, Tensor out, boolean flipFilter, int stride)
 	{
 		// Precompute some values
@@ -310,11 +337,11 @@ class Tensor extends Vec
 			throw new RuntimeException("Expected tensors with the same number of dimensions");
 		if(dc != out.dims.length)
 			throw new RuntimeException("Expected tensors with the same number of dimensions");
-		int[] kinner = new int[dc];
-		int[] kouter = new int[dc];
-		int[] stepInner = new int[dc];
-		int[] stepFilter = new int[dc];
-		int[] stepOuter = new int[dc];
+		kinner = new int[dc];
+		kouter = new int[dc];
+		stepInner = new int[dc];
+		stepFilter = new int[dc];
+		stepOuter = new int[dc];
 
 		// Compute step sizes
 		stepInner[0] = 1;

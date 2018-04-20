@@ -157,9 +157,7 @@ public class Matrix
 					Json.StringParser sp = new Json.StringParser(line);
 					sp.advance(10);
 					sp.skipWhitespace();
-					sp.advance(1);// added line
-					String attrName = sp.until('\'');// modified line
-					sp.advance(1);// added line
+					String attrName = sp.untilWhitespace();
 					m_attr_name.add(attrName);
 					sp.skipWhitespace();
 					int valCount = 0;
@@ -491,9 +489,10 @@ public class Matrix
 
 
 	/// Adds one new row to this matrix. Returns a reference to the new row.
+	protected int c;
 	public double[] newRow()
 	{
-		int c = cols();
+		c = cols();
 		if (c == 0)
 			throw new IllegalArgumentException("You must add some columns before you add any rows.");
 		double[] newRow = new double[c];
@@ -502,15 +501,15 @@ public class Matrix
 	}
 
 
-	/// Adds one new row to this matrix at the specified location. Returns a reference to the new row.
-	public double[] insertRow(int i)
+	/// Adds one new row to this matrix at the specified location.
+	public void insertRow(int i, double[] row)
 	{
-		int c = cols();
+		c = cols();
+		if(row.length != c)
+			throw new IllegalArgumentException("Mismatching row sizes.");
 		if (c == 0)
 			throw new IllegalArgumentException("You must add some columns before you add any rows.");
-		double[] newRow = new double[c];
-		m_data.add(i, newRow);
-		return newRow;
+		m_data.add(i, row);
 	}
 
 
@@ -519,8 +518,30 @@ public class Matrix
 	{
 		return m_data.remove(i);
 	}
-
-
+	
+	/// Replaces row in Matrix with Vec
+	public void setRow(int i, double[] row) {
+		c = cols();
+		if(row.length != c)
+			throw new IllegalArgumentException("Mismatching row sizes.");
+		removeRow(i);
+		insertRow(i, row);
+	}
+	
+	public static void testsetRow() {
+		Matrix X = new Matrix(0, 3);
+		X.takeRow(new double[] {0,0,1});
+		X.takeRow(new double[] {0,0,0});
+		X.takeRow(new double[] {1,0,0});
+		
+		System.out.println(X);
+		
+		X.setRow(1, new double[] {0,2.0,0});
+		
+		System.out.println();
+		System.out.println(X);
+	}
+	
 	/// Appends the specified row to this matrix.
 	public void takeRow(double[] row)
 	{
@@ -529,12 +550,13 @@ public class Matrix
 		m_data.add(row);
 	}
 	
+	protected double[] values;
 	/// Appends the specified Vec to this matrix (as a row).
 	public void takeVec(Vec row)
 	{
 		if(row.size() != cols())
 			throw new IllegalArgumentException("Row size differs from the number of columns in this matrix.");
-		double[] values = new double[row.size()];
+		values = new double[row.size()];
 		for(int i=0; i<values.length; i++) {
 			values[i] = row.get(i);
 		}
@@ -580,9 +602,10 @@ public class Matrix
 	}
 	
 	/// Get double value
+	protected double val;
 	public double get(int r, int c)
 	{
-		double val = m_data.get(r)[c];
+		val = m_data.get(r)[c];
 		return val;
 	}
 
@@ -638,13 +661,15 @@ public class Matrix
 
 
 	/// Returns the mean of the elements in the specified column. (Elements with the value UNKNOWN_VALUE are ignored.)
+	protected double sum, min, max;
+	protected int count;
 	public double columnMean(int col)
 	{
-		double sum = 0.0;
-		int count = 0;
+		sum = 0.0;
+		count = 0;
 		for (double[] list : m_data)
 		{
-			double val = list[col];
+			val = list[col];
 			if (val != UNKNOWN_VALUE)
 			{
 				sum += val;
@@ -659,10 +684,10 @@ public class Matrix
 	/// Returns the minimum element in the specified column. (Elements with the value UNKNOWN_VALUE are ignored.)
 	public double columnMin(int col)
 	{
-		double min = Double.MAX_VALUE;
+		min = Double.MAX_VALUE;
 		for (double[] list : m_data)
 		{
-			double val = list[col];
+			val = list[col];
 			if (val != UNKNOWN_VALUE)
 				min = Math.min(min, val);
 		}
@@ -674,10 +699,10 @@ public class Matrix
 	/// Returns the maximum element in the specifed column. (Elements with the value UNKNOWN_VALUE are ignored.)
 	public double columnMax(int col)
 	{
-		double max = -Double.MAX_VALUE;
+		max = -Double.MAX_VALUE;
 		for (double[] list : m_data)
 		{
-			double val = list[col];
+			val = list[col];
 			if (val != UNKNOWN_VALUE)
 				max = Math.max(max, val);
 		}
@@ -687,12 +712,14 @@ public class Matrix
 
 
 	/// Returns the most common value in the specified column. (Elements with the value UNKNOWN_VALUE are ignored.)
+	protected int valueCount;
+	protected double value;
 	public double mostCommonValue(int col)
 	{
 		HashMap<Double, Integer> counts = new HashMap<Double, Integer>();
 		for (double[] list : m_data)
 		{
-			double val = list[col];
+			val = list[col];
 			if (val != UNKNOWN_VALUE)
 			{
 				Integer result = counts.get(val);
@@ -702,8 +729,8 @@ public class Matrix
 			}
 		}
 		
-		int valueCount = 0;
-		double value   = 0;
+		valueCount = 0;
+		value   = 0;
 		for (Map.Entry<Double, Integer> entry : counts.entrySet())
 		{
 			if (entry.getValue() > valueCount)
@@ -716,17 +743,19 @@ public class Matrix
 		return value;
 	}
 	
+	protected int[] indexes;
+	protected int length, temp, swap_index;
 	/// Shuffle the rows of a matrix
 	public void shuffle() {
 		
-		int length = this.rows();
-		int[] indexes = new int[length];
+		length = this.rows();
+		indexes = new int[length];
 		for(int i=0; i<length; i++) {
 			indexes[i] = i;
 		}
 		for(int i=length-1; i>0; i--) {
-			int temp = indexes[i];
-			int swap_index = MyRandom.getinteger(i);
+			temp = indexes[i];
+			swap_index = MyRandom.getinteger(i);
 			indexes[i] = indexes[swap_index]; 
 			indexes[swap_index] = temp;
 		}
@@ -746,6 +775,7 @@ public class Matrix
 	}
 
 	/// Copies the specified rectangular portion of that matrix, and puts it in the specified location in this matrix.
+	protected double[] source, dest;
 	public void copyBlock(int destRow, int destCol, Matrix that, int rowBegin, int colBegin, int rowCount, int colCount)
 	{
 		if (destRow + rowCount > this.rows() || destCol + colCount > this.cols())
@@ -764,8 +794,8 @@ public class Matrix
 		// Copy the specified region of data
 		for (int i = 0; i < rowCount; i++)
 		{
-			double[] source = that.m_data.get(rowBegin + i);
-			double[] dest = this.m_data.get(destRow + i);
+			source = that.m_data.get(rowBegin + i);
+			dest = this.m_data.get(destRow + i);
 			for(int j = 0; j < colCount; j++)
 				dest[destCol + j] = source[colBegin + j];
 		}

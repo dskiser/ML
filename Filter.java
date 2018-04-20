@@ -1,21 +1,28 @@
 class Filter extends SupervisedLearner {
 	
 	protected NeuralNet NN;
-	protected boolean categorize;
-	protected boolean impute;
-	protected boolean normalize;
-	protected boolean initialize;
+	protected boolean catX, catY, normX, normY, impX, impY, initialize;
 	protected Imputer impx, impy;
 	protected Normalizer normx, normy;
 	protected NomCat nomx, nomy;
+	protected Matrix transformedX, transformedY, newX, newY;
+	protected double[] oldfeat, newfeat, oldlabel, newlabel, newrow;
+	protected double[] input, newinput, output, new_output;
+	protected int xrows, yrows, new_columns;
+	protected Vec inputVec, activation, outputVec;
 	
-	Filter(NeuralNet nn, boolean cat, boolean imp, boolean norm) {
+	Filter(NeuralNet nn, boolean categorizeX, boolean imputeX, boolean normalizeX,
+							boolean categorizeY, boolean imputeY, boolean normalizeY) {
 		super();
 		
 		NN = nn;
-		categorize = cat;
-		impute = imp;
-		normalize = norm;
+		catX = categorizeX;
+		impX = imputeX;
+		normX = normalizeX;
+		catY = categorizeY;
+		impY = imputeY;
+		normY = normalizeY;
+		
 		initialize = true;
 	}
 	
@@ -24,183 +31,140 @@ class Filter extends SupervisedLearner {
 	}
 	
 	public void train(Matrix X, Matrix Y) {
-		/*
-		System.out.println("Before transformations: ");
-		for(int i = 0; i < Y.rows(); i++) {
-			System.out.print(Y.get(i, 0));
-		}
-		*/
-		Matrix transformedX = X;
-		Matrix transformedY = Y;
-		if(normalize) {
+		
+		if(normX) {
 			// normalize values in X
 			normx = new Normalizer();
 			normx.train(X);
-			Matrix newX = normx.outputTemplate();
-			int xrows = X.rows();
+			newX = normx.outputTemplate();
+			xrows = X.rows();
 			for(int i = 0; i < xrows; i++) {
-				double[] oldfeat = X.row(i).toArray();
-				double[] newfeat = new double[newX.cols()];
+				oldfeat = X.removeRow(i);
+				newfeat = new double[newX.cols()];
 				normx.transform(oldfeat, newfeat);
-				newX.takeRow(newfeat);
+				X.insertRow(i, newfeat);
 			}
-			transformedX = newX;
+		}
+		
+		if(normY) {
 			// normalize values in Y
 			normy = new Normalizer();
 			normy.train(Y);
-			Matrix newY = normy.outputTemplate();
-			int yrows = Y.rows();
+			newY = normy.outputTemplate();
+			yrows = Y.rows();
 			for(int i = 0; i < yrows; i++) {
-				double[] oldfeat = Y.row(i).toArray();
-				double[] newfeat = new double[newY.cols()];
-				normy.transform(oldfeat, newfeat);
-				newY.takeRow(newfeat);
+				oldlabel = Y.removeRow(i);
+				newlabel = new double[newY.cols()];
+				normy.transform(oldlabel, newlabel);
+				Y.insertRow(i, newlabel);
 			}
-			transformedY = newY;
 		}
-		/*
-		System.out.println("After normalize: ");
-		for(int i = 0; i < X.rows(); i++) {
-			System.out.print(X.get(i, 0));
-		}
-		*/
-		if(impute) {
+		
+		if(impX) {
 			// impute values in X
 			impx = new Imputer();
 			impx.train(X);
-			Matrix newX = impx.outputTemplate();
-			int xrows = X.rows();
+			newX = impx.outputTemplate();
+			xrows = X.rows();
 			for(int i = 0; i < xrows; i++) {
-				double[] oldfeat = X.row(i).toArray();
-				double[] newfeat = new double[newX.cols()];
+				oldfeat = X.row(i).toArray();
+				newfeat = new double[newX.cols()];
 				impx.transform(oldfeat, newfeat);
 				newX.takeRow(newfeat);
 			}
-			transformedX = newX;
+			X = newX;
+		}
+		if(impY) {
 			// impute values in Y
 			impy = new Imputer();
 			impy.train(Y);
-			Matrix newY = impy.outputTemplate();
-			int yrows = Y.rows();
+			newY = impy.outputTemplate();
+			yrows = Y.rows();
 			for(int i = 0; i < yrows; i++) {
-				double[] oldfeat = Y.row(i).toArray();
-				double[] newfeat = new double[newY.cols()];
+				oldfeat = Y.row(i).toArray();
+				newfeat = new double[newY.cols()];
 				impy.transform(oldfeat, newfeat);
 				newY.takeRow(newfeat);
 			}
-			transformedY = newY;
+			Y = newY;
 		}
-		/*
-		System.out.println("After impute: ");
-		for(int i = 0; i < X.rows(); i++) {
-			System.out.print(X.get(i, 0));
-		}
-		*/
 		
-		if(categorize) {
+		if(catX) {
 			// transform X
 			nomx = new NomCat();
 			nomx.train(X);
-			Matrix newX = nomx.outputTemplate();
-			int xrows = X.rows();
+			newX = nomx.outputTemplate();
+			xrows = X.rows();
 			for(int i = 0; i < xrows; i++) {
-				double[] oldfeat = X.row(i).toArray();
-				double[] newfeat = new double[newX.cols()];
+				
+				oldfeat = X.removeRow(i);
+				newfeat = new double[newX.cols()];
 				nomx.transform(oldfeat, newfeat);
-				newX.takeRow(newfeat);
+				X.insertRow(i, newfeat);
 			}
-			transformedX = newX;
+		}
+		if(catY) {
+			
 			// transform Y
 			nomy = new NomCat();
 			nomy.train(Y);
-			Matrix newY = nomy.outputTemplate();
-			int yrows = Y.rows();
+			newY = nomy.outputTemplate();
+			yrows = Y.rows();
 			for(int i = 0; i < yrows; i++) {
-				double[] oldlabel = Y.row(i).toArray();
-				double[] newlabel = new double[newY.cols()];
+				
+				oldlabel = Y.row(i).toArray();
+				newlabel = new double[newY.cols()];
 				nomy.transform(oldlabel, newlabel);
-				newY.takeRow(newlabel);
+				newY.insertRow(i, newlabel);
+				
 			}
-			transformedY = newY;
+			Y = newY;
 		}
-		/*
-		System.out.println("After categorize: ");
-		for(int i = 0; i < X.rows(); i++) {
-			System.out.print(X.get(i, 0));
-		}
-		System.out.println("Transformed matrix X: ");
-		System.out.println(X);
-		System.out.println("inputs: " + X.cols() + " outputs: " + Y.cols());
-		*/
+		
 		if(!initialize) {
-			//System.out.println("Transformed matrix Y: ");
-			//System.out.println(transformedY);
-			NN.train(transformedX, transformedY);
-			//for(Vec weights : NN.layerWeights)
-				//System.out.println("weights: " + weights);
+			NN.train(X, Y);
 		}
 	}
 	
 	Vec predict(Vec x) {
 		// Transform x
-		double[] input = x.toArray();
-		if(normalize) { // do normalization before imputation, since unknown columns imputed as 0.0
-			int new_columns = normx.outputTemplate().cols();
-			double[] newinput = new double[new_columns];
+		input = x.toArray();
+		if(normX) { // do normalization before imputation, since unknown columns imputed as 0.0
+			new_columns = normx.outputTemplate().cols();
+			newinput = new double[new_columns];
 			normx.transform(input, newinput);
 			input = newinput;
-			/*
-			System.out.print("normalize: ");
-			for(int i = 0; i < newinput.length; i++)
-				System.out.print(newinput[i]);
-			System.out.println();
-			*/
 		} 
-		if(impute) {
-			int new_columns = impx.outputTemplate().cols();
-			double[] newinput = new double[new_columns];
+		if(impX) {
+			new_columns = impx.outputTemplate().cols();
+			newinput = new double[new_columns];
 			impx.transform(input, newinput);
 			input = newinput;
-			/*
-			System.out.print("impute: ");
-			for(int i = 0; i < newinput.length; i++)
-				System.out.print(newinput[i]);
-			System.out.println();
-			*/
 		}
-		if(categorize) {
-			int new_columns = nomx.outputTemplate().cols();
-			double[] newinput = new double[new_columns];
+		if(catX) {
+			new_columns = nomx.outputTemplate().cols();
+			newinput = new double[new_columns];
 			nomx.transform(input, newinput);
 			input = newinput;
-			/*
-			System.out.print("categorize: ");
-			for(int i = 0; i < newinput.length; i++)
-				System.out.print(newinput[i]);
-			System.out.println();
-			*/
 		}
-		Vec inputVec = new Vec(input);
-		//System.out.println("Vec to be predicted on: " + inputVec);
+		inputVec = new Vec(input);
 		
 		// Predict
-		Vec activation = NN.predict(inputVec);
-		//System.out.println("Activation returned: " + activation);
+		activation = NN.predict(inputVec);
 		
 		// Untransform activation (don't need impute)
-		double[] output = activation.toArray();
-		if(categorize) {
-			double[] new_output = new double[nomy.origColumns()];
+		output = activation.toArray();
+		if(catY) {
+			new_output = new double[nomy.origColumns()];
 			nomy.untransform(output, new_output);
 			output = new_output;
 		}
-		if(normalize) {
-			double[] new_output = new double[output.length];
+		if(normY) {
+			new_output = new double[output.length];
 			normy.untransform(output, new_output);
 			output = new_output;
 		} 
-		Vec outputVec = new Vec(output);
-		//System.out.println(outputVec + " ");
+		outputVec = new Vec(output);
 		return outputVec;
 	}
 }
