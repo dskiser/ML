@@ -1,3 +1,4 @@
+setwd("~/Programs/ML/ml_package/")
 path1 <- read.table("path.arff", sep = ",", header = F, comment.char = "@")
 
 df <- as.data.frame(path1)

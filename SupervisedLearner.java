@@ -75,8 +75,10 @@ abstract class SupervisedLearner
 		{
 			tr = testX.row(i);
 			pred = predict(tr);
+			//System.out.println("pred: " + pred.size());
 			act = testY.row(i);
-			for(int j = 0; j < tr.size(); j++)
+			//System.out.println("act: " + act.size());
+			for(int j = 0; j < pred.size(); j++)
 			{
 				double errorSquared = Math.pow((pred.get(j) - act.get(j)), 2);
 				//System.out.println(errorSquared + "= (" + pred.get(j) + " - " + act.get(j) + ")2");

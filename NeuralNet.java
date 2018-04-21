@@ -1,4 +1,8 @@
 import java.util.ArrayList;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.IOException;
 
 class NeuralNet extends SupervisedLearner {
 	
@@ -81,10 +85,10 @@ class NeuralNet extends SupervisedLearner {
 				//System.out.println(x);
 				y = Y.row(i);
 				
-				this.refineWeights(x, y, 0.005);
+				this.refineWeights(x, y, 0.03);
 				
 				stop++;
-				//if(stop == 1000) break; //only use 10000 patterns at a time
+				if(stop == 1000) break; //only use 10000 patterns at a time
 			}
 		}
 	}
@@ -103,7 +107,15 @@ class NeuralNet extends SupervisedLearner {
 		double[] vrow;
 		for(int j = 0; j < 10; j++) {
 			System.out.println("Beginning cycle " + (j+1) + ": ");
+			int cyc = 0;
+			int percent = 0;
 			for(int i = 0; i < 10000000; i++) {
+				cyc++;
+				if(cyc == 1000000) {
+					percent += 10;
+					System.out.println(percent + "%");
+					cyc = 0;
+				}
 				//System.out.println();
 				//System.out.println("j=" + j + ", i=" + i);
 				
@@ -358,7 +370,32 @@ class NeuralNet extends SupervisedLearner {
 		}
 	}
 	
-
+	public void makeImage(Vec state, String filename) {
+		Vec in = new Vec(4);
+		in.set(2, state.get(0));
+		in.set(3, state.get(1));
+		//System.out.println(in);
+		Vec out;
+		BufferedImage image = new BufferedImage(64, 48, BufferedImage.TYPE_INT_ARGB);
+		for(int i = 0; i < 48; i++) {
+			in.set(1, (double) i / 48.0);
+			for(int j = 0; j < 64; j++) {
+				in.set(0, (double) j / 64.0);
+				out = predict(in);
+				int color = rgbToUint((int) (out.get(0) * 256), (int) (out.get(1) * 256), (int) (out.get(2) * 256));
+				image.setRGB(j, i, color);
+			}
+		}
+		System.out.println("Creating " + filename);
+		try {
+			ImageIO.write(image, "png", new File(filename));
+		} catch (IOException exc) { System.out.println("Oops"); }
+	}
+	
+	public int rgbToUint(int r, int g, int b) {
+		//System.out.println(r + ", " + g + ", " + b);
+		return 0xff000000 | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
+	}
 	
 	public static void testRefineWeights() 
 		throws TestFailedException {
