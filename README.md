@@ -1,3 +1,3 @@
-# Machine Learning package
+# Project for Machine Learning (CSCE 5063 -- Spring 2018)
 
-Project for a course.
+This course focused on Neural Networks, and my project for the course was use Java to build a machine learning package that implemented Neural Networks in various ways.   The course professor, Dr. Gashler, provided me with some starting code that included matrix and vector functions, but I was responsible for implementing linear, nonlinear, and convolutional layers; backpropagation; stochastic and batch gradient descent; momentum; and cross validation.  Assignments included using Neural Networks for time series prediction and inference.
